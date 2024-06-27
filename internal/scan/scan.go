@@ -66,18 +66,18 @@ func decode(path string) (DecodedImage, error) {
 	if err != nil {
 		return img, err
 	}
-	img.Config = config
+	img.Width = config.Width
+	img.Height = config.Height
 
 	_, err = f.Seek(0, 0)
 	if err != nil {
 		panic(err)
 	}
-	slog.Debug("Decoding image", slog.String("path", path), slog.String("dimension", fmt.Sprintf("%dx%d", img.Config.Width, img.Config.Height)))
-	imageData, imageType, err := image.Decode(f)
+	slog.Debug("Decoding image", slog.String("path", path), slog.String("dimension", fmt.Sprintf("%dx%d", img.Width, img.Height)))
+	imageData, _, err := image.Decode(f)
 	if err != nil {
 		return img, err
 	}
-	img.Type = imageType
 	img.Image = imageData
 
 	return img, nil
@@ -85,7 +85,7 @@ func decode(path string) (DecodedImage, error) {
 
 type DecodedImage struct {
 	image.Image
-	image.Config
-	Type string
-	Path string
+	Width  int
+	Height int
+	Path   string
 }
