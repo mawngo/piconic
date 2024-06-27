@@ -14,6 +14,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -69,12 +70,17 @@ func NewCLI() *CLI {
 				}
 			}
 
+			concurrency := runtime.NumCPU()
+			con := make(chan struct{}, concurrency)
 			for _, arg := range args {
 				for img := range scan.Img(arg) {
-					process(f, img)
+					process(f, img, con)
 				}
 			}
 
+			for range concurrency {
+				con <- struct{}{}
+			}
 			slog.Info("Processing completed", slog.Duration("took", time.Since(now)))
 		},
 	}
@@ -102,7 +108,17 @@ func (cli *CLI) Execute() {
 	}
 }
 
-func process(f flags, img scan.DecodedImage) {
+func process(f flags, img scan.DecodedImage, con chan struct{}) {
+	con <- struct{}{}
+	go func() {
+		defer func() {
+			<-con
+		}()
+		generateIcon(f, img)
+	}()
+}
+
+func generateIcon(f flags, img scan.DecodedImage) {
 	outName := fmt.Sprintf("%s.%dpc%d.png", strings.TrimSuffix(filepath.Base(img.Path), filepath.Ext(img.Path)), f.Size, f.Padding)
 	outfile := filepath.Join(f.Output, outName)
 	if _, err := os.Stat(outfile); err == nil {
