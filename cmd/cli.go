@@ -102,6 +102,7 @@ func NewCLI() *CLI {
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
 	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
+	command.Flags().UintVar(&f.SrcRound, "src-round", f.SrcRound, "Round the source image (by % of the size)")
 	command.PersistentFlags().Bool("debug", false, "Enable debug mode")
 	return &CLI{&command}
 }
@@ -111,6 +112,7 @@ type flags struct {
 	Output     string
 	Padding    uint
 	Round      uint
+	SrcRound   uint
 	Overwrite  bool
 	Background string
 	Trim       string
@@ -147,6 +149,12 @@ func generateIcon(f flags, img scan.DecodedImage) {
 
 	bgColor, rect := calculateTargetRect(f, img)
 	img = resize(f, img, rect)
+	if f.SrcRound > 0 {
+		err := utils.RoundImage(img.Image, float64(f.SrcRound)/100)
+		if err != nil {
+			slog.Warn("Source format does not support rounding", slog.String("out", outfile))
+		}
+	}
 
 	bgImg := image.NewRGBA(image.Rect(0, 0, int(f.Size), int(f.Size)))
 	draw.Draw(bgImg, bgImg.Bounds(), &image.Uniform{C: bgColor}, image.Point{}, draw.Src)
