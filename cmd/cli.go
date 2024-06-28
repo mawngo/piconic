@@ -139,6 +139,13 @@ func process(f flags, img scan.DecodedImage, con chan struct{}) {
 }
 
 func generateIcon(f flags, img scan.DecodedImage) {
+	slog.Info("Processing",
+		slog.String("img", filepath.Base(img.Path)),
+		slog.String("dimension", fmt.Sprintf("%dx%d", img.Width, img.Height)),
+		slog.String("bg", f.Background),
+		slog.Any("size", f.Size),
+	)
+
 	outName := fmt.Sprintf("%s.%dpc%d.png", strings.TrimSuffix(filepath.Base(img.Path), filepath.Ext(img.Path)), f.Size, f.Padding)
 	outfile := filepath.Join(f.Output, outName)
 	if _, err := os.Stat(outfile); err == nil {
