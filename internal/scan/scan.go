@@ -2,6 +2,8 @@ package scan
 
 import (
 	"fmt"
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
 	"image"
 	"log/slog"
 	"os"
@@ -61,6 +63,9 @@ func decode(path string) (DecodedImage, error) {
 		return img, err
 	}
 	defer f.Close()
+	if filepath.Ext(path) == ".svg" {
+		return decodeSvg(f, path)
+	}
 
 	config, _, err := image.DecodeConfig(f)
 	if err != nil {
@@ -80,6 +85,25 @@ func decode(path string) (DecodedImage, error) {
 	}
 	img.Image = imageData
 
+	return img, nil
+}
+
+func decodeSvg(f *os.File, path string) (DecodedImage, error) {
+	img := DecodedImage{
+		Path: path,
+	}
+	icon, err := oksvg.ReadIconStream(f)
+	if err != nil {
+		return img, err
+	}
+	w := int(icon.ViewBox.W)
+	h := int(icon.ViewBox.H)
+	icon.SetTarget(0, 0, float64(w), float64(h))
+	rgba := image.NewRGBA(image.Rect(0, 0, w, h))
+	icon.Draw(rasterx.NewDasher(w, h, rasterx.NewScannerGV(w, h, rgba, rgba.Bounds())), 1)
+	img.Image = rgba
+	img.Width = w
+	img.Height = h
 	return img, nil
 }
 

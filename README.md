@@ -2,6 +2,8 @@
 
 Generate project icon from image.
 
+Support png, jpeg, webp, bmp, [svg2.0](https://github.com/srwiley/oksvg).
+
 ## Installation
 
 Require go 1.22+
@@ -50,7 +52,7 @@ Flags:
 
 ## Examples
 
-### Generate simple icon:
+### Generate simple icon
 
 ```
 piconic eyes.png
@@ -65,7 +67,7 @@ piconic eyes.png
 |-----------------------|---------------------------------------|
 | ![eyes.png](eyes.png) | ![eyes.200pc10.png](eyes.200pc10.png) |
 
-### Customized generation:
+### Customized generation
 
 ```
 piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=250
