@@ -68,14 +68,14 @@ piconic eyes.png
 ### Customized generation:
 
 ```
-piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=480
+piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=250
 ```
 
 ```shell
-5:32PM INF Processing img=cat.jpg dimension=481x480 bg=Orange500 size=480
-5:32PM INF Processing completed took=29.352891ms
+5:38PM INF Processing img=cat.jpg dimension=241x240 bg=Orange500 size=250
+5:38PM INF Processing completed took=11.122575ms
 ```
 
 | Original            | Icon                                |
 |---------------------|-------------------------------------|
-| ![cat.jpg](cat.jpg) | ![cat.480pc20.png](cat.480pc20.png) |
+| ![cat.jpg](cat.jpg) | ![cat.250pc20.png](cat.250pc20.png) |
