@@ -6,6 +6,8 @@ import (
 	"github.com/mawngo/piconic/internal/utils"
 	"github.com/phsym/console-slog"
 	"github.com/spf13/cobra"
+	matcolornames "golang.org/x/exp/shiny/materialdesign/colornames"
+	"golang.org/x/image/colornames"
 	"golang.org/x/image/draw"
 	"image"
 	"image/color"
@@ -18,6 +20,9 @@ import (
 	"strings"
 	"time"
 )
+
+const backgroundDefaultColor = "#f8fafc"
+const transparentColor = "transparent"
 
 func Init() *slog.LevelVar {
 	level := &slog.LevelVar{}
@@ -40,10 +45,11 @@ func NewCLI() *CLI {
 	level := Init()
 
 	f := flags{
-		Size:    200,
-		Output:  ".",
-		Padding: 10,
-		Round:   0,
+		Size:       200,
+		Output:     ".",
+		Padding:    10,
+		Round:      0,
+		Background: backgroundDefaultColor,
 	}
 
 	command := cobra.Command{
@@ -87,6 +93,8 @@ func NewCLI() *CLI {
 
 	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
 	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
+	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material color name like Yellow500 or svg 1.1 color name like yellow]")
+	command.Flags().StringVar(&f.Background, "trim", "b", "")
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
 	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
@@ -95,11 +103,13 @@ func NewCLI() *CLI {
 }
 
 type flags struct {
-	Size      uint
-	Output    string
-	Padding   uint
-	Round     uint
-	Overwrite bool
+	Size       uint
+	Output     string
+	Padding    uint
+	Round      uint
+	Overwrite  bool
+	Background string
+	Trim       string
 }
 
 func (cli *CLI) Execute() {
@@ -131,9 +141,9 @@ func generateIcon(f flags, img scan.DecodedImage) {
 		}
 	}
 
-	img = resize(f, img)
+	bgColor, rect := calculateTargetRect(f, img)
+	img = resize(f, img, rect)
 
-	bgColor := calculateBGColor(f, img)
 	bgImg := image.NewRGBA(image.Rect(0, 0, int(f.Size), int(f.Size)))
 	draw.Draw(bgImg, bgImg.Bounds(), &image.Uniform{C: bgColor}, image.Point{}, draw.Src)
 
@@ -157,7 +167,7 @@ func generateIcon(f flags, img scan.DecodedImage) {
 	}
 }
 
-func resize(f flags, img scan.DecodedImage) scan.DecodedImage {
+func resize(f flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedImage {
 	imgSize := img.Width
 	if img.Width < img.Height {
 		imgSize = img.Height
@@ -172,7 +182,7 @@ func resize(f flags, img scan.DecodedImage) scan.DecodedImage {
 	resized := image.NewRGBA(image.Rect(0, 0, width, height))
 	draw.CatmullRom.Scale(resized, resized.Bounds(),
 		img.Image,
-		calculateTrimmedRect(img),
+		rect,
 		draw.Src,
 		nil)
 	slog.Debug("Resized image", slog.String("path", img.Path), slog.String("dimension", fmt.Sprintf("%dx%d", width, height)))
@@ -184,16 +194,45 @@ func resize(f flags, img scan.DecodedImage) scan.DecodedImage {
 	}
 }
 
-func calculateBGColor(_ flags, _ scan.DecodedImage) color.RGBA {
-	// TODO: calculate based on image content.
-	c, err := utils.ParseHexColor("#f8fafc")
-	if err != nil {
-		panic(err)
-	}
-	return c
+func calculateTargetRect(f flags, img scan.DecodedImage) (color.RGBA, image.Rectangle) {
+	return calculateColor(f.Background, backgroundDefaultColor), img.Bounds()
 }
 
-func calculateTrimmedRect(img image.Image) image.Rectangle {
-	// TODO: only include image content region.
-	return img.Bounds()
+func calculateColor(bg string, fallback string) color.RGBA {
+	if bg == transparentColor {
+		return utils.EmptyColor
+	}
+
+	if !strings.HasPrefix(bg, "#") {
+		// SVG color names.
+		c, ok := colornames.Map[bg]
+		if ok {
+			return c
+		}
+		// Material design color names.
+		c, ok = matcolornames.Map[bg]
+		if ok {
+			return c
+		}
+		slog.Error("Unsupported color, fallback to default hex",
+			slog.String("color", bg),
+			slog.String("default", fallback),
+		)
+		bg = fallback
+	}
+
+	c, err := utils.ParseHexColor(bg)
+	if err != nil {
+		slog.Error("Invalid background hex color, fallback to default",
+			slog.String("hex", bg),
+			slog.String("default", fallback))
+		if fallback == transparentColor {
+			return utils.EmptyColor
+		}
+		c, err = utils.ParseHexColor(fallback)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return c
 }

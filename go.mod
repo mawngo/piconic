@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/phsym/console-slog v0.3.1
 	github.com/spf13/cobra v1.8.1
+	golang.org/x/exp/shiny v0.0.0-20240613232115-7f521ea00fb8
 	golang.org/x/image v0.18.0
 )
 
