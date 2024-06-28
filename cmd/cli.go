@@ -95,14 +95,16 @@ func NewCLI() *CLI {
 		},
 	}
 
-	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
 	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
+	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
+	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
 	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material color name like Yellow500 or svg 1.1 color name like yellow]")
 	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "List of color to trim when process image")
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
-	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
 	command.Flags().UintVar(&f.SrcRound, "src-round", f.SrcRound, "Round the source image (by % of the size)")
+	command.Flags().IntVar(&f.PadX, "padx", f.PadX, "Additional padding to the x axis (by % of the size)")
+	command.Flags().IntVar(&f.PadY, "pady", f.PadY, "Additional padding to the y axis (by % of the size)")
 	command.PersistentFlags().Bool("debug", false, "Enable debug mode")
 	return &CLI{&command}
 }
@@ -116,6 +118,8 @@ type flags struct {
 	Overwrite  bool
 	Background string
 	Trim       string
+	PadX       int
+	PadY       int
 }
 
 func (cli *CLI) Execute() {
@@ -160,6 +164,7 @@ func generateIcon(f flags, img scan.DecodedImage) {
 	draw.Draw(bgImg, bgImg.Bounds(), &image.Uniform{C: bgColor}, image.Point{}, draw.Src)
 
 	offset := image.Pt((int(f.Size)-img.Width)/2, (int(f.Size)-img.Height)/2)
+	offset = offset.Add(image.Pt(int(math.RoundToEven((float64(f.PadX)/100)*float64(f.Size))), int(math.RoundToEven((float64(f.PadY)/100)*float64(f.Size)))))
 	slog.Debug("Padding", slog.Int("x", offset.X), slog.Int("y", offset.Y))
 	draw.Draw(bgImg, bgImg.Bounds().Add(offset), img.Image, image.Point{}, draw.Over)
 	if f.Round > 0 {
