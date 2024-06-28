@@ -36,7 +36,7 @@ Usage:
   piconic [files...] [flags]
 
 Flags:
-  -b, --bg string        Background color [transparent, hex, material color name like Yellow500 or svg 1.1 color name like yellow] (default "#f1f5f9")
+  -b, --bg string        Background color [transparent, hex, material, svg 1.1] (default "#f1f5f9")
       --debug            Enable debug mode
   -h, --help             help for piconic
   -o, --out string       Output directory name (default ".")
@@ -49,6 +49,15 @@ Flags:
       --src-round uint   Round the source image (by % of the size)
       --trim string      List of color to trim when process image (default "transparent")
 ```
+
+### Color support
+
+All flags that accept color support the following values:
+
+- transparent
+- hex colors, for example: #ffffff
+- [material colors](https://m2.material.io/design/color/the-color-system.html), for example: Yellow500
+- [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example: yellow
 
 ## Examples
 
@@ -63,9 +72,9 @@ piconic eyes.png
 5:31PM INF Processing completed took=5.339563ms
 ```
 
-| Original              | Icon                                  |
-|-----------------------|---------------------------------------|
-| ![eyes.png](eyes.png) | ![eyes.200pc10.png](eyes.200pc10.png) |
+| Original                   | Icon                                       |
+|----------------------------|--------------------------------------------|
+| ![eyes.png](docs/eyes.png) | ![eyes.200pc10.png](docs/eyes.200pc10.png) |
 
 ### Customized generation
 
@@ -78,6 +87,6 @@ piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=25
 5:38PM INF Processing completed took=11.122575ms
 ```
 
-| Original            | Icon                                |
-|---------------------|-------------------------------------|
-| ![cat.jpg](cat.jpg) | ![cat.250pc20.png](cat.250pc20.png) |
+| Original                 | Icon                                     |
+|--------------------------|------------------------------------------|
+| ![cat.jpg](docs/cat.jpg) | ![cat.250pc20.png](docs/cat.250pc20.png) |

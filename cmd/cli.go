@@ -98,7 +98,7 @@ func NewCLI() *CLI {
 	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
 	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
-	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material color name like Yellow500 or svg 1.1 color name like yellow]")
+	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material, svg 1.1]")
 	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "List of color to trim when process image")
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
