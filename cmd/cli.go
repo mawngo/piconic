@@ -7,10 +7,13 @@ import (
 	"github.com/phsym/console-slog"
 	"github.com/spf13/cobra"
 	matcolornames "golang.org/x/exp/shiny/materialdesign/colornames"
+	_ "golang.org/x/image/bmp" // Enable support for bmp.
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/draw"
+	_ "golang.org/x/image/webp" // Enable support for webp.
 	"image"
 	"image/color"
+	_ "image/jpeg" // Enable support for jpeg.
 	"image/png"
 	"log/slog"
 	"math"
@@ -50,6 +53,7 @@ func NewCLI() *CLI {
 		Padding:    10,
 		Round:      0,
 		Background: backgroundDefaultColor,
+		Trim:       transparentColor,
 	}
 
 	command := cobra.Command{
@@ -94,7 +98,7 @@ func NewCLI() *CLI {
 	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
 	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
 	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material color name like Yellow500 or svg 1.1 color name like yellow]")
-	command.Flags().StringVar(&f.Background, "trim", "b", "")
+	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "List of color to trim when process image")
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
 	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
@@ -194,11 +198,78 @@ func resize(f flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedIm
 	}
 }
 
-func calculateTargetRect(f flags, img scan.DecodedImage) (color.RGBA, image.Rectangle) {
-	return calculateColor(f.Background, backgroundDefaultColor), img.Bounds()
+func calculateTargetRect(f flags, img scan.DecodedImage) (color.Color, image.Rectangle) {
+	if f.Trim == "" {
+		return calculateColor(f.Background, backgroundDefaultColor), img.Bounds()
+	}
+	colors := strings.Split(f.Trim, ",")
+	trim := make([]color.Color, 0, len(colors))
+	for _, s := range colors {
+		trim = append(trim, calculateColor(strings.TrimSpace(s), transparentColor))
+	}
+	trim = utils.Uniq(trim)
+
+	// Trim colors by finding a new bound.
+	minPt := img.Bounds().Min
+	maxPt := img.Bounds().Max
+
+MINX:
+	for x := range img.Bounds().Max.X {
+		for y := range img.Bounds().Max.Y {
+			if isContainAnyColors(trim, img, x, y) {
+				continue
+			}
+			minPt.X = x
+			break MINX
+		}
+	}
+
+MINY:
+	for y := range img.Bounds().Max.Y {
+		for x := range img.Bounds().Max.X {
+			if isContainAnyColors(trim, img, x, y) {
+				continue
+			}
+			minPt.Y = y
+			break MINY
+		}
+	}
+
+MAXX:
+	for x := img.Bounds().Max.X - 1; x >= 0; x-- {
+		for y := img.Bounds().Max.Y - 1; y >= 0; y-- {
+			if isContainAnyColors(trim, img, x, y) {
+				continue
+			}
+			maxPt.X = x
+			break MAXX
+		}
+	}
+MAXY:
+	for y := img.Bounds().Max.Y - 1; y >= 0; y-- {
+		for x := img.Bounds().Max.X - 1; x >= 0; x-- {
+			if isContainAnyColors(trim, img, x, y) {
+				continue
+			}
+			maxPt.Y = y
+			break MAXY
+		}
+	}
+	return calculateColor(f.Background, backgroundDefaultColor), image.Rectangle{Min: minPt, Max: maxPt}
 }
 
-func calculateColor(bg string, fallback string) color.RGBA {
+func isContainAnyColors(colors []color.Color, img image.Image, x int, y int) bool {
+	r, g, b, a := img.At(x, y).RGBA()
+	for _, rgba := range colors {
+		cr, cg, cb, ca := rgba.RGBA()
+		if cr == r && cg == g && cb == b && ca == a {
+			return true
+		}
+	}
+	return false
+}
+
+func calculateColor(bg string, fallback string) color.Color {
 	if bg == transparentColor {
 		return utils.EmptyColor
 	}
@@ -214,7 +285,7 @@ func calculateColor(bg string, fallback string) color.RGBA {
 		if ok {
 			return c
 		}
-		slog.Error("Unsupported color, fallback to default hex",
+		slog.Warn("Unsupported color, fallback to default hex",
 			slog.String("color", bg),
 			slog.String("default", fallback),
 		)
@@ -223,7 +294,7 @@ func calculateColor(bg string, fallback string) color.RGBA {
 
 	c, err := utils.ParseHexColor(bg)
 	if err != nil {
-		slog.Error("Invalid background hex color, fallback to default",
+		slog.Warn("Invalid hex color, fallback to default",
 			slog.String("hex", bg),
 			slog.String("default", fallback))
 		if fallback == transparentColor {
