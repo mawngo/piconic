@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-const backgroundDefaultColor = "#f8fafc"
+const backgroundDefaultColor = "#f1f5f9"
 const transparentColor = "transparent"
 
 func Init() *slog.LevelVar {
