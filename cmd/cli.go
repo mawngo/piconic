@@ -192,16 +192,16 @@ func generateIcon(f flags, img scan.DecodedImage) {
 }
 
 func resize(f flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedImage {
-	imgSize := img.Width
-	if img.Width < img.Height {
-		imgSize = img.Height
+	imgSize := rect.Dx()
+	if imgSize < rect.Dy() {
+		imgSize = rect.Dy()
 	}
 	targetSize := float64(f.Size) - float64(f.Size)*(float64(f.Padding)/100)*2
 	ratio := targetSize / float64(imgSize)
 	slog.Debug("Resize ratio", slog.String("path", img.Path), slog.Float64("ratio", ratio))
 
-	width := int(math.RoundToEven(float64(img.Width) * ratio))
-	height := int(math.RoundToEven(float64(img.Height) * ratio))
+	width := int(math.RoundToEven(float64(rect.Dx()) * ratio))
+	height := int(math.RoundToEven(float64(rect.Dy()) * ratio))
 
 	resized := image.NewRGBA(image.Rect(0, 0, width, height))
 	draw.CatmullRom.Scale(resized, resized.Bounds(),
