@@ -103,6 +103,7 @@ func NewCLI() *CLI {
 	command.Flags().IntVar(&f.PadX, "padx", f.PadX, "Additional padding to the x axis (by % of the size)")
 	command.Flags().IntVar(&f.PadY, "pady", f.PadY, "Additional padding to the y axis (by % of the size)")
 	command.PersistentFlags().Bool("debug", false, "Enable debug mode")
+	command.Flags().SortFlags = false
 	return &CLI{&command}
 }
 
