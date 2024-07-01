@@ -7,13 +7,10 @@ import (
 	"github.com/phsym/console-slog"
 	"github.com/spf13/cobra"
 	matcolornames "golang.org/x/exp/shiny/materialdesign/colornames"
-	_ "golang.org/x/image/bmp" // Enable support for bmp.
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/draw"
-	_ "golang.org/x/image/webp" // Enable support for webp.
 	"image"
 	"image/color"
-	_ "image/jpeg" // Enable support for jpeg.
 	"image/png"
 	"log/slog"
 	"math"

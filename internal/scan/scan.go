@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
+	_ "golang.org/x/image/bmp"  // Enable support for bmp.
+	_ "golang.org/x/image/webp" // Enable support for webp.
 	"image"
+	_ "image/jpeg" // Enable support for jpeg.
+	_ "image/png"  // Enable support for bmp.
 	"log/slog"
 	"os"
 	"path/filepath"
