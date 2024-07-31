@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mawngo/piconic/internal/colorcmp"
 	"github.com/mawngo/piconic/internal/scan"
 	"github.com/mawngo/piconic/internal/utils"
 	"github.com/phsym/console-slog"
@@ -22,6 +23,7 @@ import (
 )
 
 const backgroundDefaultColor = "#f1f5f9"
+const autoColor = "auto"
 const transparentColor = "transparent"
 
 func Init() *slog.LevelVar {
@@ -49,7 +51,7 @@ func NewCLI() *CLI {
 		Output:     ".",
 		Padding:    10,
 		Round:      0,
-		Background: backgroundDefaultColor,
+		Background: autoColor,
 		Trim:       transparentColor,
 	}
 
@@ -95,7 +97,7 @@ func NewCLI() *CLI {
 	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
 	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
 	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
-	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color [transparent, hex, material, svg 1.1]")
+	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1]")
 	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "List of color to trim when process image")
 	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
 	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
@@ -218,12 +220,12 @@ func resize(f flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedIm
 
 func calculateTargetRect(f flags, img scan.DecodedImage) (color.Color, image.Rectangle) {
 	if f.Trim == "" {
-		return calculateColor(f.Background, backgroundDefaultColor), img.Bounds()
+		return calculateColor(img, f.Background, backgroundDefaultColor), img.Bounds()
 	}
 	colors := strings.Split(f.Trim, ",")
 	trim := make([]color.Color, 0, len(colors))
 	for _, s := range colors {
-		trim = append(trim, calculateColor(strings.TrimSpace(s), transparentColor))
+		trim = append(trim, calculateColor(img, strings.TrimSpace(s), transparentColor))
 	}
 	trim = utils.Uniq(trim)
 
@@ -273,7 +275,7 @@ MAXY:
 			break MAXY
 		}
 	}
-	return calculateColor(f.Background, backgroundDefaultColor), image.Rectangle{Min: minPt, Max: maxPt}
+	return calculateColor(img, f.Background, backgroundDefaultColor), image.Rectangle{Min: minPt, Max: maxPt}
 }
 
 func isContainAnyColors(colors []color.Color, img image.Image, x int, y int) bool {
@@ -287,7 +289,25 @@ func isContainAnyColors(colors []color.Color, img image.Image, x int, y int) boo
 	return false
 }
 
-func calculateColor(bg string, fallback string) color.Color {
+func calculateColor(img scan.DecodedImage, bg string, fallback string) color.Color {
+	if strings.HasPrefix(bg, autoColor) {
+		c, ok := calculateAutoBackgroundColor(img)
+		if ok {
+			return c
+		}
+		// Does not specify auto fallback color.
+		if !strings.Contains(bg, ",") {
+			var err error
+			c, err = utils.ParseHexColor(fallback)
+			if err != nil {
+				panic(err)
+			}
+			return c
+		}
+		// Fallback color specified, parse fallback color instead.
+		bg = strings.TrimSpace(strings.Split(bg, ",")[1])
+	}
+
 	if bg == transparentColor {
 		return utils.EmptyColor
 	}
@@ -324,4 +344,40 @@ func calculateColor(bg string, fallback string) color.Color {
 		}
 	}
 	return c
+}
+
+func calculateAutoBackgroundColor(img scan.DecodedImage) (color.Color, bool) {
+	c := img.At(0, 0)
+	diffCnt := 0
+	if img.Bounds().Max.X <= 8 || img.Bounds().Max.Y <= 8 {
+		// Require need at least 8x8 image to auto calculate color
+		return c, false
+	}
+
+	// The bg color will be set to the 2px border color if all pixels of the border have the same color.
+	// Checking the left and right border.
+	for y := 2; y < img.Bounds().Max.Y-2; y++ {
+		for x := range []int{0, 1, img.Bounds().Max.X - 2, img.Bounds().Max.X - 1} {
+			border := img.At(x, y)
+			if colorcmp.CmpCIE76(c, border) > 0.02 {
+				diffCnt++
+			}
+		}
+	}
+
+	// Checking the top and bottom border.
+	for x := 0; x < img.Bounds().Max.X; x++ {
+		for y := range []int{0, 1, img.Bounds().Max.Y - 2, img.Bounds().Max.Y - 1} {
+			border := img.At(x, y)
+			if colorcmp.CmpCIE76(c, border) > 0.02 {
+				diffCnt++
+			}
+		}
+	}
+	diffRatio := float64(diffCnt) / float64(img.Bounds().Max.X*4+img.Bounds().Max.Y*4)
+	// We can ignore if the ratio of different pixel is small enough.
+	if diffRatio > 0.01 {
+		return c, false
+	}
+	return c, true
 }

@@ -49,7 +49,7 @@ type settable interface {
 	Set(x, y int, c color.Color)
 }
 
-var EmptyColor = color.RGBA{}
+var EmptyColor color.Color = color.RGBA{}
 
 func RoundImage(m image.Image, rate float64) error {
 	b := m.Bounds()
@@ -57,7 +57,7 @@ func RoundImage(m image.Image, rate float64) error {
 	r := (float64(min(w, h)) / 2) * rate
 	sm, ok := m.(settable)
 	if !ok {
-		// Check if image is YCbCr format.
+		// Check if the image is YCbCr format.
 		ym, ok := m.(*image.YCbCr)
 		if !ok {
 			return ErrFormatNotSupported
