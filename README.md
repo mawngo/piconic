@@ -39,7 +39,7 @@ Flags:
   -o, --out string       Output directory name (default ".")
   -w, --overwrite        Overwrite output if exists
   -s, --size uint        Size of the output image (default 200)
-  -b, --bg string        Background color [transparent, hex, material, svg 1.1] (default "#f1f5f9")
+  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto")
       --trim string      List of color to trim when process image (default "transparent")
   -p, --padding uint     Padding of the icon image (by % of the size) (default 10)
   -r, --round uint       Round the output image (by % of the size)
@@ -48,6 +48,7 @@ Flags:
       --pady int         Additional padding to the y axis (by % of the size)
       --debug            Enable debug mode
   -h, --help             help for piconic
+
 ```
 
 ### Color support
