@@ -55,10 +55,11 @@ Flags:
 
 All flags that accept color support the following values:
 
-- transparent
-- hex colors, for example: #ffffff
-- [material colors](https://m2.material.io/design/color/the-color-system.html), for example: Yellow500
-- [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example: yellow
+- `transparent`
+- hex colors, for example, `#ffffff`
+- [material colors](https://m2.material.io/design/color/the-color-system.html), for example, `Yellow500`
+- [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example, `yellow`
+- auto, based on the image border color, for example, `auto`, `auto,#ffffff`
 
 ## Examples
 
