@@ -51,7 +51,7 @@ func NewCLI() *CLI {
 		Output:     ".",
 		Padding:    10,
 		Round:      0,
-		Background: autoColor,
+		Background: autoColor + "," + backgroundDefaultColor,
 		Trim:       transparentColor,
 	}
 
@@ -377,6 +377,10 @@ func calculateAutoBackgroundColor(img scan.DecodedImage) (color.Color, bool) {
 	diffRatio := float64(diffCnt) / float64(img.Bounds().Max.X*4+img.Bounds().Max.Y*4)
 	// We can ignore if the ratio of different pixel is small enough.
 	if diffRatio > 0.01 {
+		return c, false
+	}
+	if _, _, _, a := c.RGBA(); a == 0 {
+		// Ignore transparent image.
 		return c, false
 	}
 	return c, true

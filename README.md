@@ -39,7 +39,7 @@ Flags:
   -o, --out string       Output directory name (default ".")
   -w, --overwrite        Overwrite output if exists
   -s, --size uint        Size of the output image (default 200)
-  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto")
+  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto,#f1f5f9")
       --trim string      List of color to trim when process image (default "transparent")
   -p, --padding uint     Padding of the icon image (by % of the size) (default 10)
   -r, --round uint       Round the output image (by % of the size)
