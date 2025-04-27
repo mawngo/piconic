@@ -49,8 +49,6 @@ type settable interface {
 	Set(x, y int, c color.Color)
 }
 
-var EmptyColor color.Color = color.RGBA{}
-
 func RoundImage(m image.Image, rate float64) error {
 	b := m.Bounds()
 	w, h := b.Dx(), b.Dy()
@@ -69,16 +67,16 @@ func RoundImage(m image.Image, rate float64) error {
 	for y := 0.0; y <= r; y++ {
 		l := math.Round(r - math.Sqrt(2*y*r-y*y))
 		for x := 0; x <= int(l); x++ {
-			sm.Set(x-1, int(y)-1, EmptyColor)
+			sm.Set(x-1, int(y)-1, color.Transparent)
 		}
 		for x := 0; x <= int(l); x++ {
-			sm.Set(w-x, int(y)-1, EmptyColor)
+			sm.Set(w-x, int(y)-1, color.Transparent)
 		}
 		for x := 0; x <= int(l); x++ {
-			sm.Set(x-1, h-int(y), EmptyColor)
+			sm.Set(x-1, h-int(y), color.Transparent)
 		}
 		for x := 0; x <= int(l); x++ {
-			sm.Set(w-x, h-int(y), EmptyColor)
+			sm.Set(w-x, h-int(y), color.Transparent)
 		}
 	}
 	return nil

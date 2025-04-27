@@ -208,7 +208,7 @@ func calculateColor(img scan.DecodedImage, bg string, fallback string) color.Col
 	}
 
 	if bg == TransparentColor {
-		return utils.EmptyColor
+		return color.Transparent
 	}
 
 	if !strings.HasPrefix(bg, "#") {
@@ -235,7 +235,7 @@ func calculateColor(img scan.DecodedImage, bg string, fallback string) color.Col
 			slog.String("hex", bg),
 			slog.String("default", fallback))
 		if fallback == TransparentColor {
-			return utils.EmptyColor
+			return color.Transparent
 		}
 		c, err = utils.ParseHexColor(fallback)
 		if err != nil {
