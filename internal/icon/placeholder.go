@@ -104,13 +104,7 @@ func WritePlaceholder(f PlaceholderFlags, placeholder string) {
 	draw.Draw(img, img.Bounds(), &image.Uniform{C: bgColor}, image.Point{}, draw.Src)
 
 	if placeholder != "" {
-		c := freetype.NewContext()
-		c.SetFont(tff)
-		c.SetSrc(&image.Uniform{C: color.Transparent})
-		c.SetDst(img)
-		c.SetClip(img.Bounds())
-
-		fontsize, xOffset, yOffset, err := calculateFontSize(f, c, placeholder, img)
+		fontsize, xOffset, yOffset, err := calculateFontSize(f, placeholder, img)
 		xcenter := (float64(f.W) / 2.0) - xOffset
 		ycenter := (float64(f.H) / 2.0) - yOffset
 		if err != nil {
@@ -118,6 +112,11 @@ func WritePlaceholder(f PlaceholderFlags, placeholder string) {
 			return
 		}
 
+		c := freetype.NewContext()
+		c.SetFont(tff)
+		c.SetSrc(&image.Uniform{C: color.Transparent})
+		c.SetDst(img)
+		c.SetClip(img.Bounds())
 		c.SetFontSize(fontsize)
 		c.SetSrc(image.NewUniform(&image.Uniform{C: textColor}))
 		_, err = c.DrawString(placeholder, freetype.Pt(int(xcenter), int(ycenter)))
@@ -129,18 +128,26 @@ func WritePlaceholder(f PlaceholderFlags, placeholder string) {
 	writeOutImage(f.OutputFlags, outfile, img)
 }
 
-func calculateFontSize(f PlaceholderFlags, c *freetype.Context, text string, img draw.Image) (float64, float64, float64, error) {
+func calculateFontSize(f PlaceholderFlags, text string, img draw.Image) (float64, float64, float64, error) {
 	maxW := int(math.RoundToEven(float64(f.W) * (1 - float64(f.Padding)*2/100)))
 	maxH := int(math.RoundToEven(float64(f.H) * (1 - float64(f.Padding)*2/100)))
 	fontsize := float64(maxH)
 
-	// Estimate the biggest matching tff size for the requested height.
-	for int(c.PointToFixed(fontsize)/64) > maxH {
-		fontsize -= 2
-	}
 	// Find the biggest matching tff size for the requested height.
-	for calculateFontHeight(fontsize) > maxH {
+	height := calculateFontHeight(fontsize)
+	iter := float64(1)
+	for int(height) > maxH {
 		fontsize -= 2
+		oldHeight := height
+		height = calculateFontHeight(fontsize)
+		if iter < 1 {
+			continue
+		}
+		reductionRate := math.Ceil(oldHeight-height) / iter
+		iter = math.Floor((math.Ceil(height) - math.Floor(float64(maxH))) / reductionRate)
+		if iter > 1 {
+			fontsize -= iter * 2
+		}
 	}
 
 	face := truetype.NewFace(tff, &truetype.Options{
@@ -154,6 +161,7 @@ func calculateFontSize(f PlaceholderFlags, c *freetype.Context, text string, img
 	}
 	// Find the biggest matching tff size for the requested width.
 	actWidth := float64(drawer.MeasureString(text)) / 64
+	iter = float64(1)
 	for int(actWidth) > maxW {
 		if err := face.Close(); err != nil {
 			panic(err)
@@ -163,7 +171,16 @@ func calculateFontSize(f PlaceholderFlags, c *freetype.Context, text string, img
 			Size: fontsize,
 		})
 		drawer.Face = face
+		oldWidth := actWidth
 		actWidth = float64(drawer.MeasureString(text)) / 64
+		if iter < 1 {
+			continue
+		}
+		reductionRate := math.Ceil(oldWidth-actWidth) / iter
+		iter = math.Floor((math.Ceil(actWidth) - math.Floor(float64(maxW))) / reductionRate)
+		if iter > 1 {
+			fontsize -= iter * 2
+		}
 	}
 
 	if err := face.Close(); err != nil {
@@ -179,12 +196,12 @@ func calculateFontSize(f PlaceholderFlags, c *freetype.Context, text string, img
 	return fontsize, float64(adv) / 2 / 64, yBaselineToCenterOffset / 64, nil
 }
 
-func calculateFontHeight(fontsize float64) int {
+func calculateFontHeight(fontsize float64) float64 {
 	face := truetype.NewFace(tff, &truetype.Options{
 		Size: fontsize,
 	})
 	defer face.Close()
-	return int(face.Metrics().Height / 64)
+	return float64(face.Metrics().Height) / 64
 }
 
 func calculatePlaceholderTextColor(text string, bg color.Color, dimStr string) (string, color.Color) {
