@@ -13,6 +13,7 @@ import (
 	"image/color"
 	"log/slog"
 	"math"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -220,8 +221,8 @@ func calculatePlaceholderBackgroundColor(bg string) color.Color {
 
 func calculatePlaceholderColor(cname string, fallback string) (color.Color, bool) {
 	if strings.HasPrefix(cname, AutoColor) {
-		// TODO: return random color when auto color is enabled.
-		return calculatePlaceholderColor(BackgroundDefaultColor, TransparentColor)
+		i := rand.Intn(len(matcolornames.Names))
+		return matcolornames.Map[matcolornames.Names[i]], true
 	}
 
 	if cname == TransparentColor {

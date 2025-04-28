@@ -69,7 +69,7 @@ Instead of generating icon from image, you can generate placeholder image by usi
 The last non-size argument will be used as placeholder text, if not supplied, then the generated image will use size as
 placeholder.
 The text color can be configured by adding `<#color>` at the end of the string.
-Supported color types are `hex`, `material`, `svg 1.1`
+Supported color types are `hex`, `material`, `svg 1.1`, `auto` (random)
 
 ```shell
 piconic <widthxheight> "optional placeholder text or <none> for no text <optional-text-color>"
@@ -119,12 +119,12 @@ piconic 300x250
 ```
 
 ```
-piconic 300x250 "hello <blue>"
+piconic 300x250 "hello <Green100>" --bg="Brown700"
 ```
 
 ```shell
-2:42AM INF Processing text=hello <blue> dimension=300x250 bg=auto,#f1f5f9
-2:42AM INF Processing completed took=97.9344ms
+2:59AM INF Processing text=hello <Green100> dimension=300x250 bg=Brown700
+2:59AM INF Processing completed took=136.1677ms
 ```
 
-![300x250pc10.png](docs/300x250pc10.png) ![hello-blue.300x250pc10.png](docs/hello-blue.300x250pc10.png)
+![300x250pc10.png](docs/300x250pc10.png) ![hello-blue.300x250pc10.png](docs/hello-Green100.300x250pc10.png)
