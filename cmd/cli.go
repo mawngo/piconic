@@ -33,12 +33,14 @@ func NewCLI() *CLI {
 	level := Init()
 
 	f := icon.Flags{
-		Size:       200,
-		Output:     ".",
-		Padding:    10,
-		Round:      0,
-		Background: icon.AutoColor + "," + icon.BackgroundDefaultColor,
-		Trim:       icon.TransparentColor,
+		Size: 200,
+		OutputFlags: icon.OutputFlags{
+			Output:     ".",
+			Padding:    10,
+			Round:      0,
+			Background: icon.AutoColor + "," + icon.BackgroundDefaultColor,
+			Trim:       icon.TransparentColor,
+		},
 	}
 
 	command := cobra.Command{

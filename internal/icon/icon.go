@@ -24,17 +24,21 @@ const (
 	TransparentColor       = "transparent"
 )
 
-type Flags struct {
-	Size       uint
+type OutputFlags struct {
 	Output     string
 	Padding    uint
 	Round      uint
-	SrcRound   uint
 	Overwrite  bool
 	Background string
 	Trim       string
 	PadX       int
 	PadY       int
+}
+
+type Flags struct {
+	OutputFlags
+	Size     uint
+	SrcRound uint
 }
 
 func WriteIcon(f Flags, img scan.DecodedImage) {
@@ -46,15 +50,9 @@ func WriteIcon(f Flags, img scan.DecodedImage) {
 	)
 
 	outName := fmt.Sprintf("%s.%dpc%d.png", strings.TrimSuffix(filepath.Base(img.Path), filepath.Ext(img.Path)), f.Size, f.Padding)
-	outfile := filepath.Join(f.Output, outName)
-	if _, err := os.Stat(outfile); err == nil {
-		slog.Info("File existed",
-			slog.Any("path", outfile),
-			slog.Bool("override", f.Overwrite),
-		)
-		if !f.Overwrite {
-			return
-		}
+	outfile, ok := canWriteOutImage(f.OutputFlags, outName)
+	if !ok {
+		return
 	}
 
 	bgColor, rect := calculateTargetRect(f, img)
@@ -73,21 +71,7 @@ func WriteIcon(f Flags, img scan.DecodedImage) {
 	offset = offset.Add(image.Pt(int(math.RoundToEven((float64(f.PadX)/100)*float64(f.Size))), int(math.RoundToEven((float64(f.PadY)/100)*float64(f.Size)))))
 	slog.Debug("Padding", slog.Int("x", offset.X), slog.Int("y", offset.Y))
 	draw.Draw(bgImg, bgImg.Bounds().Add(offset), img.Image, image.Point{}, draw.Over)
-	if f.Round > 0 {
-		err := utils.RoundImage(bgImg, float64(f.Round)/100)
-		if err != nil {
-			slog.Warn("Output format does not support rounding", slog.String("out", outfile))
-		}
-	}
-
-	o, err := os.Create(outfile)
-	if err == nil {
-		err = png.Encode(o, bgImg)
-	}
-	if err != nil {
-		slog.Error("Error writing image", slog.String("out", outfile), slog.Any("err", err))
-		return
-	}
+	writeOutImage(f.OutputFlags, outName, bgImg)
 }
 
 func resize(f Flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedImage {
@@ -283,4 +267,40 @@ func calculateAutoBackgroundColor(img scan.DecodedImage) (color.Color, bool) {
 		return c, false
 	}
 	return c, true
+}
+
+func writeOutImage(f OutputFlags, outName string, img image.Image) {
+	if f.Round > 0 {
+		err := utils.RoundImage(img, float64(f.Round)/100)
+		if err != nil {
+			slog.Warn("Output format does not support rounding", slog.String("out", filepath.Join(f.Output, outName)))
+		}
+	}
+
+	outfile, ok := canWriteOutImage(f, outName)
+	if !ok {
+		return
+	}
+	o, err := os.Create(outfile)
+	if err == nil {
+		err = png.Encode(o, img)
+	}
+	if err != nil {
+		slog.Error("Error writing image", slog.String("out", outfile), slog.Any("err", err))
+		return
+	}
+}
+
+func canWriteOutImage(f OutputFlags, outName string) (string, bool) {
+	outfile := filepath.Join(f.Output, outName)
+	if _, err := os.Stat(outfile); err == nil {
+		if !f.Overwrite {
+			slog.Warn("File existed",
+				slog.Any("path", outfile),
+				slog.Bool("override", f.Overwrite),
+			)
+			return outfile, false
+		}
+	}
+	return outfile, true
 }
