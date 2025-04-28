@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -69,9 +70,37 @@ func NewCLI() *CLI {
 
 			concurrency := runtime.NumCPU()
 			con := make(chan struct{}, concurrency)
-			for _, arg := range args {
-				for img := range scan.Img(arg) {
-					process(f, img, con)
+
+			// If the first argument is a placeholder size, then switch to generating placeholder.
+			if _, _, ok := icon.ParsePlaceholderSize(args[0]); ok {
+				placeholders := make(map[string][]icon.PlaceholderFlags)
+				sizes := make([]icon.PlaceholderFlags, 0, len(args))
+				for _, arg := range args {
+					if w, h, ok := icon.ParsePlaceholderSize(arg); ok {
+						sizes = append(sizes, icon.PlaceholderFlags{
+							OutputFlags: f.OutputFlags,
+							W:           w,
+							H:           h,
+						})
+						continue
+					}
+					arg = strings.TrimSpace(arg)
+					placeholders[arg] = append(placeholders[arg], sizes...)
+					sizes = make([]icon.PlaceholderFlags, 0, len(args))
+				}
+				placeholders[""] = append(placeholders[""], sizes...)
+
+				for placeholder, sizes := range placeholders {
+					for _, size := range sizes {
+						processPlaceholder(size, placeholder, con)
+					}
+				}
+			} else {
+				// Generate icon mode.
+				for _, arg := range args {
+					for img := range scan.Img(arg) {
+						processIcon(f, img, con)
+					}
 				}
 			}
 
@@ -103,12 +132,22 @@ func (cli *CLI) Execute() {
 	}
 }
 
-func process(f icon.Flags, img scan.DecodedImage, con chan struct{}) {
+func processIcon(f icon.Flags, img scan.DecodedImage, con chan struct{}) {
 	con <- struct{}{}
 	go func() {
 		defer func() {
 			<-con
 		}()
 		icon.WriteIcon(f, img)
+	}()
+}
+
+func processPlaceholder(f icon.PlaceholderFlags, text string, con chan struct{}) {
+	con <- struct{}{}
+	go func() {
+		defer func() {
+			<-con
+		}()
+		icon.WritePlaceholder(f, text)
 	}()
 }

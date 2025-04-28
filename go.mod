@@ -3,6 +3,7 @@ module github.com/mawngo/piconic
 go 1.24.0
 
 require (
+	github.com/goki/freetype v1.0.5
 	github.com/phsym/console-slog v0.3.1
 	github.com/spf13/cobra v1.9.1
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c

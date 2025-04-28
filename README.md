@@ -61,6 +61,20 @@ All flags that accept color support the following values:
 - [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example, `yellow`
 - auto, based on the image border background color, for example, `auto`, `auto,#ffffff`
 
+### Generate placeholder image
+
+Instead of generating icon from image, you can generate placeholder image by using sizes as arguments, for example
+`300x250`, `320x50`, `640x200`.
+
+The last non-size argument will be used as placeholder text, if not supplied, then the generated image will use size as
+placeholder.
+The text color can be configured by adding `<#color>` at the end of the string.
+Supported color types are `hex`, `material`, `svg 1.1`
+
+```shell
+piconic <widthxheight> "optional placeholder text or <none> for no text <optional-text-color>"
+```
+
 ## Examples
 
 ### Generate simple icon
@@ -92,3 +106,25 @@ piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=25
 | Original                 | Icon                                     |
 |--------------------------|------------------------------------------|
 | ![cat.jpg](docs/cat.jpg) | ![cat.250pc20.png](docs/cat.250pc20.png) |
+
+### Generate simple placeholder
+
+```
+piconic 300x250
+```
+
+```shell
+2:42AM INF Processing text=300x250 dimension=300x250 bg=auto,#f1f5f9
+2:42AM INF Processing completed took=515.9µs
+```
+
+```
+piconic 300x250 "hello <blue>"
+```
+
+```shell
+2:42AM INF Processing text=hello <blue> dimension=300x250 bg=auto,#f1f5f9
+2:42AM INF Processing completed took=97.9344ms
+```
+
+![300x250pc10.png](docs/300x250pc10.png) ![hello-blue.300x250pc10.png](docs/hello-blue.300x250pc10.png)
