@@ -105,8 +105,8 @@ func WritePlaceholder(f PlaceholderFlags, placeholder string) {
 
 	if placeholder != "" {
 		fontsize, xOffset, yOffset, err := calculateFontSize(f, placeholder, img)
-		xcenter := (float64(f.W) / 2.0) - xOffset
-		ycenter := (float64(f.H) / 2.0) - yOffset
+		xcenter := (float64(f.W) / 2.0) - xOffset + (float64(f.W) * float64(f.PadX) / 100)
+		ycenter := (float64(f.H) / 2.0) - yOffset + (float64(f.H) * float64(f.PadY) / 100)
 		if err != nil {
 			slog.Error("Error calculating tff size", slog.String("dimension", dimStr), slog.Any("err", err))
 			return
