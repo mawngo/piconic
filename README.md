@@ -39,7 +39,7 @@ Flags:
   -o, --out string       Output directory name (default ".")
   -w, --overwrite        Overwrite output if exists
   -s, --size uint        Size of the output image (default 200)
-  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto,#f1f5f9")
+  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto,#fafafa")
       --trim string      List of color to trim when process image (default "transparent")
   -p, --padding uint     Padding of the icon image (by % of the size) (default 10)
   -r, --round uint       Round the output image (by % of the size)
@@ -56,10 +56,10 @@ Flags:
 All flags that accept color support the following values:
 
 - `transparent`
-- hex colors, for example, `#ffffff`
+- hex colors, for example, `#fafafa`
 - [material colors](https://m2.material.io/design/color/the-color-system.html), for example, `Yellow500`
 - [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example, `yellow`
-- auto, based on the image border background color, for example, `auto`, `auto,#ffffff`
+- auto, based on the image border background color, for example, `auto`, `auto,#fafafa`
 
 ### Generate placeholder image
 

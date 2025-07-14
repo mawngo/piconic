@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	BackgroundDefaultColor = "#f1f5f9"
+	BackgroundDefaultColor = "#fafafa"
 	AutoColor              = "auto"
 	TransparentColor       = "transparent"
 )
