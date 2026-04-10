@@ -62,7 +62,7 @@ All flags that accept color support the following values:
 - [svg1.1 colors](docs/SVG1.1_Color_Swatch.svg.png), for example, `yellow`
 - auto, based on the image border background color, for example, `auto`, `auto,#fafafa`
 
-### Generate placeholder image
+### Generate a placeholder image
 
 Instead of generating icon from image, you can generate placeholder image by using sizes as arguments, for example
 `300x250`, `320x50`, `640x200`.
