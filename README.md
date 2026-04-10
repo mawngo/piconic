@@ -38,19 +38,18 @@ Usage:
   piconic [files...] [flags]
 
 Flags:
-  -o, --out string       Output directory name (default ".")
-  -w, --overwrite        Overwrite output if exists
-  -s, --size uint        Size of the output image (default 200)
-  -b, --bg string        Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto,#fafafa")
-      --trim string      List of color to trim when process image (default "transparent")
-  -p, --padding uint     Padding of the icon image (by % of the size) (default 10)
-  -r, --round uint       Round the output image (by % of the size)
-      --src-round uint   Round the source image (by % of the size)
-      --padx int         Additional padding to the x axis (by % of the size)
-      --pady int         Additional padding to the y axis (by % of the size)
-      --debug            Enable debug mode
+  -o, --out string       output directory name (default ".")
+  -w, --overwrite        overwrite output if exists
+  -s, --size uint        size of the output image (default 200)
+  -b, --bg string        background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1] (default "auto,#fafafa")
+      --trim string      list of color to trim when process image (default "transparent")
+  -p, --padding uint     padding of the icon image (by % of the size) (default 10)
+  -r, --round uint       round the output image (by % of the size)
+      --src-round uint   round the source image (by % of the size)
+      --padx int         additional padding to the x axis (by % of the size)
+      --pady int         additional padding to the y axis (by % of the size)
+      --debug            enable debug mode
   -h, --help             help for piconic
-
 ```
 
 ### Color support

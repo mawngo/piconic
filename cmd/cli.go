@@ -111,17 +111,17 @@ func NewCLI() *CLI {
 		},
 	}
 
-	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "Output directory name")
-	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "Overwrite output if exists")
-	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "Size of the output image")
-	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "Background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1]")
-	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "List of color to trim when process image")
-	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "Padding of the icon image (by % of the size)")
-	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "Round the output image (by % of the size)")
-	command.Flags().UintVar(&f.SrcRound, "src-round", f.SrcRound, "Round the source image (by % of the size)")
-	command.Flags().IntVar(&f.PadX, "padx", f.PadX, "Additional padding to the x axis (by % of the size)")
-	command.Flags().IntVar(&f.PadY, "pady", f.PadY, "Additional padding to the y axis (by % of the size)")
-	command.PersistentFlags().Bool("debug", false, "Enable debug mode")
+	command.Flags().StringVarP(&f.Output, "out", "o", f.Output, "output directory name")
+	command.Flags().BoolVarP(&f.Overwrite, "overwrite", "w", f.Overwrite, "overwrite output if exists")
+	command.Flags().UintVarP(&f.Size, "size", "s", f.Size, "size of the output image")
+	command.Flags().StringVarP(&f.Background, "bg", "b", f.Background, "background color ['transparent', 'auto', 'auto,fallback', hex, material, svg 1.1]")
+	command.Flags().StringVar(&f.Trim, "trim", f.Trim, "list of color to trim when process image")
+	command.Flags().UintVarP(&f.Padding, "padding", "p", f.Padding, "padding of the icon image (by % of the size)")
+	command.Flags().UintVarP(&f.Round, "round", "r", f.Round, "round the output image (by % of the size)")
+	command.Flags().UintVar(&f.SrcRound, "src-round", f.SrcRound, "round the source image (by % of the size)")
+	command.Flags().IntVar(&f.PadX, "padx", f.PadX, "additional padding to the x axis (by % of the size)")
+	command.Flags().IntVar(&f.PadY, "pady", f.PadY, "additional padding to the y axis (by % of the size)")
+	command.PersistentFlags().Bool("debug", false, "enable debug mode")
 	command.Flags().SortFlags = false
 	return &CLI{&command}
 }
