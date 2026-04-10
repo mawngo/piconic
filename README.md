@@ -1,16 +1,18 @@
 # &pi;conic
 
-Generate project icon from image.
+Generate project icons from an image.
 
 Support png, jpeg, webp, bmp, [svg2.0](https://github.com/srwiley/oksvg).
 
 ## Installation
 
-Require go 1.22+
+Require go 1.26+
 
 ```shell
 go install github.com/mawngo/piconic@latest
 ```
+
+Alternately, check the [Releases](https://github.com/mawngo/piconic/releases) page for pre-built binaries.
 
 ## Usage
 
@@ -20,7 +22,7 @@ Generate icon using image
 > piconic .\my-image.jpeg
 ```
 
-Or generate for all images in directory
+Or generate for all images in a directory
 
 ```shell
 > piconic .\my-dir
@@ -77,7 +79,7 @@ piconic <widthxheight> "optional placeholder text or <none> for no text <optiona
 
 ## Examples
 
-### Generate simple icon
+### Generate a simple icon
 
 ```
 piconic eyes.png
@@ -107,7 +109,7 @@ piconic cat.jpg --round=20 --src-round=100 --bg=Orange500 --padding=20 --size=25
 |--------------------------|------------------------------------------|
 | ![cat.jpg](docs/cat.jpg) | ![cat.250pc20.png](docs/cat.250pc20.png) |
 
-### Generate simple placeholder
+### Generate a simple placeholder
 
 ```
 piconic 300x250
