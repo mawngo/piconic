@@ -75,10 +75,7 @@ func WriteIcon(f Flags, img scan.DecodedImage) {
 }
 
 func resize(f Flags, img scan.DecodedImage, rect image.Rectangle) scan.DecodedImage {
-	imgSize := rect.Dx()
-	if imgSize < rect.Dy() {
-		imgSize = rect.Dy()
-	}
+	imgSize := max(rect.Dx(), rect.Dy())
 	targetSize := float64(f.Size) - float64(f.Size)*(float64(f.Padding)/100)*2
 	ratio := targetSize / float64(imgSize)
 	slog.Debug("Resize ratio", slog.String("path", img.Path), slog.Float64("ratio", ratio))

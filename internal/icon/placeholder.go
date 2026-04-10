@@ -144,7 +144,7 @@ func calculateFontSize(f PlaceholderFlags, text string, img draw.Image) (float64
 			continue
 		}
 		reductionRate := math.Ceil(oldHeight-height) / iter
-		iter = math.Floor((math.Ceil(height) - math.Floor(float64(maxH))) / reductionRate)
+		iter = math.Floor((math.Ceil(height) - float64(maxH)) / reductionRate)
 		if iter > 1 {
 			fontsize -= iter * 2
 		}
@@ -177,7 +177,7 @@ func calculateFontSize(f PlaceholderFlags, text string, img draw.Image) (float64
 			continue
 		}
 		reductionRate := math.Ceil(oldWidth-actWidth) / iter
-		iter = math.Floor((math.Ceil(actWidth) - math.Floor(float64(maxW))) / reductionRate)
+		iter = math.Floor((math.Ceil(actWidth) - float64(maxW)) / reductionRate)
 		if iter > 1 {
 			fontsize -= iter * 2
 		}
@@ -268,7 +268,7 @@ func calculatePlaceholderColor(cname string, fallback string) (color.Color, bool
 	return calculatePlaceholderColor(fallback, TransparentColor)
 }
 
-// Chooses a contrasting color (black or white) based on luminance
+// Chooses a contrasting color (black or white) based on luminance.
 func contrastColor(c color.Color) color.Color {
 	r, g, b, _ := c.RGBA()
 	rf, gf, bf := float64(r)/65535, float64(g)/65535, float64(b)/65535
